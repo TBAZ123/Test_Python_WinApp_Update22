@@ -4,8 +4,9 @@ import sys
 import urllib3
 from bs4 import BeautifulSoup
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
+from git import Repo
 
-APP_VERSION = "0.0.9"
+APP_VERSION = "0.0.23"
 
 class Example(QWidget):
 
@@ -35,28 +36,19 @@ class Example(QWidget):
             http = urllib3.PoolManager()
             url = 'https://raw.githubusercontent.com/TBAZ123/Test_Python_WinApp_Update22/main/version.txt'
             response = http.request('GET', url)
-            soup = BeautifulSoup(response.data)
-            QMessageBox.critical(None, 'Error', f'Failed to check for updates: {soup}')
-            # latest_release = response.json()
-            latest_version = float(response.data)
-            current_version = float(current_version)
-            if latest_version > current_version:
-                QMessageBox.critical(None, 'Error', f'Failed to check for updatessss: {response.data}')
-                # reply = QMessageBox.question(None, 'Update available',
-                #                              f'A new version ({latest_version}) is available. Do you want to update?',
-                #                              QMessageBox.Yes | QMessageBox.No)
-                # if reply == QMessageBox.Yes:
-                #     # Download the latest release of the application along with its version file.
-                #     for asset in latest_release['assets']:
-                #         url = asset['browser_download_url']
-                #         filename = asset['name']
-                #         if filename == 'main.py' or filename == 'version.txt':
-                #             response = requests.get(url)
-                #             with open(filename, 'wb') as f:
-                #                 f.write(response.content)
-                #     # Exit the current instance of the application and launch the newly downloaded executable.
-                #     subprocess.Popen(['python', 'main.py'])
-                #     sys.exit(0)
+            version_text = response.data.decode('utf-8')  # decode bytes to str
+            version_parts = version_text.split('.')
+            version = tuple(map(int, version_parts))
+            current_version = current_version.split('.')
+            current_version = tuple(map(int, current_version))
+            if version > current_version:
+                # QMessageBox.critical(None, 'Error', f'Failed to check for updatessss: {response.data}')
+                reply = QMessageBox.question(None, 'Update available',
+                                             f'A new version ({version_text}) is available. Do you want to update?',
+                                             QMessageBox.Yes | QMessageBox.No)
+                if reply == QMessageBox.Yes:
+
+                    sys.exit(0)
             else:
                 QMessageBox.information(None, 'No update available', 'You have the latest version of the application.')
         except Exception as e:
